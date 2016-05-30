@@ -174,7 +174,7 @@ def launch(args, defaults, description):
     parameters = process_args(args, defaults, description)
 
     # dump parameters for replication
-    time_str = time.strftime("%Y-%m-%d_%H-%M_", time.gmtime())
+    time_str = time.strftime("%Y-%m-%d_%H-%M_", time.localtime())
     exp_dir =  time_str + parameters.experiment_prefix
     exp_dir = os.path.join("results", exp_dir)
     if not os.path.isdir(exp_dir):
