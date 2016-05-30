@@ -22,7 +22,7 @@ class NeuralAgent(object):
 
     def __init__(self, q_network, epsilon_start, epsilon_min,
                  epsilon_decay, replay_memory_size, exp_pref,
-                 replay_start_size, update_frequency, rng):
+                 replay_start_size, update_frequency, rng, exp_dir):
 
         self.network = q_network
         self.epsilon_start = epsilon_start
@@ -39,16 +39,16 @@ class NeuralAgent(object):
         self.image_height = self.network.input_height
 
         # CREATE A FOLDER TO HOLD RESULTS
-        time_str = time.strftime("%Y-%m-%d-%H-%M_", time.gmtime())
-        self.exp_dir =  time_str + self.exp_pref
+        #time_str = time.strftime("%Y-%m-%d-%H-%M_", time.gmtime())
+        #self.exp_dir =  time_str + self.exp_pref
         # + \
         #               "{}".format(self.network.lr).replace(".", "p") + "_" \
         #               + "{}".format(self.network.discount).replace(".", "p")
-
-        try:
-            os.stat(os.path.join("results", self.exp_dir))
-        except OSError:
-            os.makedirs(os.path.join("results", self.exp_dir))
+        #try:
+        #    os.stat(os.path.join("results", self.exp_dir))
+        #except OSError:
+        #    os.makedirs(os.path.join("results", self.exp_dir))
+        self.exp_dir = exp_dir
 
         self.num_actions = self.network.num_actions
 
@@ -89,14 +89,14 @@ class NeuralAgent(object):
         self.last_action = None
 
     def _open_results_file(self):
-        logging.info("OPENING " + os.path.join('results', self.exp_dir, 'results.csv'))
-        self.results_file = open(os.path.join('results', self.exp_dir, 'results.csv'), 'w', 0)
+        logging.info("OPENING " + os.path.join(self.exp_dir, 'results.csv'))
+        self.results_file = open(os.path.join(self.exp_dir, 'results.csv'), 'w', 0)
         self.results_file.write(\
             'epoch,num_episodes,total_reward,reward_per_epoch,mean_q\n')
         self.results_file.flush()
 
     def _open_learning_file(self):
-        self.learning_file = open(os.path.join('results', self.exp_dir, 'learning.csv'), 'w', 0)
+        self.learning_file = open(os.path.join(self.exp_dir, 'learning.csv'), 'w', 0)
         self.learning_file.write('mean_loss,epsilon\n')
         self.learning_file.flush()
 
@@ -272,7 +272,7 @@ class NeuralAgent(object):
 
     def finish_epoch(self, epoch):
         net_file = open(
-                os.path.join('results', self.exp_dir, 'network_file_' + str(epoch) + '.pkl'),
+                os.path.join(self.exp_dir, 'network_file_' + str(epoch) + '.pkl'),
                 'w')
 
 

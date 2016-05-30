@@ -176,8 +176,9 @@ def launch(args, defaults, description):
     # dump parameters for replication
     time_str = time.strftime("%Y-%m-%d_%H-%M_", time.gmtime())
     exp_dir =  time_str + parameters.experiment_prefix
-    if not os.path.isdir(os.path.join("results", exp_dir)):
-        os.makedirs(os.path.join("results", exp_dir))
+    exp_dir = os.path.join("results", exp_dir)
+    if not os.path.isdir(exp_dir):
+        os.makedirs(exp_dir)
 
     if parameters.rom.endswith('.bin'):
         rom = parameters.rom
@@ -240,7 +241,8 @@ def launch(args, defaults, description):
                                   parameters.experiment_prefix,
                                   parameters.replay_start_size,
                                   parameters.update_frequency,
-                                  rng)
+                                  rng,
+                                  exp_dir)
 
     experiment = ale_experiment.ALEExperiment(ale, agent,
                                               defaults.RESIZED_WIDTH,
