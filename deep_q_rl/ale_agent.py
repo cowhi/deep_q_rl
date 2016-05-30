@@ -96,7 +96,7 @@ class NeuralAgent(object):
         self.results_file.flush()
 
     def _open_learning_file(self):
-        self.learning_file = open(os.path.join('results', self.exp_dir, '/learning.csv'), 'w', 0)
+        self.learning_file = open(os.path.join('results', self.exp_dir, 'learning.csv'), 'w', 0)
         self.learning_file.write('mean_loss,epsilon\n')
         self.learning_file.flush()
 
