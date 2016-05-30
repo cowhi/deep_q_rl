@@ -172,6 +172,12 @@ def launch(args, defaults, description):
     logging.basicConfig(level=logging.INFO)
     parameters = process_args(args, defaults, description)
 
+    # dump parameters for replication
+    time_str = time.strftime("_%Y-%m-%d-%H-%M_", time.gmtime())
+    self.exp_dir = self.exp_pref + time_str
+    if not os.path.isdir(os.path.join("results", self.exp_dir)):
+        os.makedirs(os.path.join("results", self.exp_dir))
+
     if parameters.rom.endswith('.bin'):
         rom = parameters.rom
     else:
