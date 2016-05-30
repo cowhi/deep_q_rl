@@ -272,7 +272,7 @@ class NeuralAgent(object):
 
     def finish_epoch(self, epoch):
         net_file = open(
-                os.path.join('results', self.exp_dir, '/network_file_' + str(epoch) + '.pkl'),
+                os.path.join('results', self.exp_dir, 'network_file_' + str(epoch) + '.pkl'),
                 'w')
 
 
