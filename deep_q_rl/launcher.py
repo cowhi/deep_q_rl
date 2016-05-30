@@ -11,6 +11,7 @@ import ale_python_interface
 import cPickle
 import numpy as np
 import theano
+import time
 
 import ale_experiment
 import ale_agent
