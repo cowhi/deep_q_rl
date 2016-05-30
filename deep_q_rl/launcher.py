@@ -180,7 +180,7 @@ def launch(args, defaults, description):
     if not os.path.isdir(exp_dir):
         os.makedirs(exp_dir)
     parameter_file = open(os.path.join(exp_dir, 'parameter.txt'), 'w', 0)
-    parameter_file.write(parameters)
+    parameter_file.write(str(parameters))
     parameter_file.flush()
     parameter_file.close()
 
