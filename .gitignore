@@ -1,2 +1,4 @@
 *.pyc
 #roms
+
+deep_q_rl/results/*

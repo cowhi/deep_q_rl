@@ -61,5 +61,7 @@ class Defaults:
     DETERMINISTIC = True
     CUDNN_DETERMINISTIC = False
 
+    TRAIN_ALL = False
+
 if __name__ == "__main__":
     launcher.launch(sys.argv[1:], Defaults, __doc__)

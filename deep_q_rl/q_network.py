@@ -25,14 +25,15 @@ class DeepQLearner:
     Deep Q-learning network using Lasagne.
     """
 
-    def __init__(self, input_width, input_height, num_actions,
+    def __init__(self, input_width, input_height, avail_actions, num_actions,
                  num_frames, discount, learning_rate, rho,
                  rms_epsilon, momentum, clip_delta, freeze_interval,
                  batch_size, network_type, update_rule,
-                 batch_accumulator, rng, input_scale=255.0):
+                 batch_accumulator, rng, train_all, input_scale=255.0):
 
         self.input_width = input_width
         self.input_height = input_height
+        self.avail_actions = avail_actions
         self.num_actions = num_actions
         self.num_frames = num_frames
         self.batch_size = batch_size
@@ -44,11 +45,13 @@ class DeepQLearner:
         self.clip_delta = clip_delta
         self.freeze_interval = freeze_interval
         self.rng = rng
+        self.train_all = train_all
 
         lasagne.random.set_rng(self.rng)
 
         self.update_counter = 0
 
+        print "num_actions: " + str(num_actions)
         self.l_out = self.build_network(network_type, input_width, input_height,
                                         num_actions, num_frames, batch_size)
         if self.freeze_interval > 0:
@@ -84,7 +87,7 @@ class DeepQLearner:
             broadcastable=(False, True))
 
         q_vals = lasagne.layers.get_output(self.l_out, states / input_scale)
-        
+
         if self.freeze_interval > 0:
             next_q_vals = lasagne.layers.get_output(self.next_l_out,
                                                     next_states / input_scale)
@@ -105,7 +108,7 @@ class DeepQLearner:
             # the clip bounds. To avoid this, we extend the loss
             # linearly past the clip point to keep the gradient constant
             # in that regime.
-            # 
+            #
             # This is equivalent to declaring d loss/d q_vals to be
             # equal to the clipped diff, then backpropagating from
             # there, which is what the DeepMind implementation does.
@@ -122,7 +125,7 @@ class DeepQLearner:
         else:
             raise ValueError("Bad accumulator: {}".format(batch_accumulator))
 
-        params = lasagne.layers.helper.get_all_params(self.l_out)  
+        params = lasagne.layers.helper.get_all_params(self.l_out)
         givens = {
             states: self.states_shared,
             next_states: self.next_states_shared,
@@ -210,10 +213,23 @@ class DeepQLearner:
         return self._q_vals()[0]
 
     def choose_action(self, state, epsilon):
+        # TODO: select action index of avail_actions
+
         if self.rng.rand() < epsilon:
-            return self.rng.randint(0, self.num_actions)
+            #return self.rng.randint(0, self.num_actions)
+            if self.train_all:
+                action_index = self.rng.randint(0, len(self.avail_actions))
+                #print "action_index: " + str(action_index)
+                return self.avail_actions[action_index]
+            else:
+                return self.rng.randint(0, self.num_actions)
         q_vals = self.q_vals(state)
-        return np.argmax(q_vals)
+        #print "q_vals: " + str(q_vals)
+        #return np.argmax(q_vals)
+        if self.train_all:
+            return self.avail_actions[np.argmax(q_vals[self.avail_actions])]
+        else:
+            return np.argmax(q_vals)
 
     def reset_q_hat(self):
         all_params = lasagne.layers.helper.get_all_param_values(self.l_out)

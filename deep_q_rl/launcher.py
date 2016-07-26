@@ -139,6 +139,9 @@ def process_args(args, defaults, description):
                         type=bool, default=defaults.CUDNN_DETERMINISTIC,
                         help=('Whether to use deterministic backprop. ' +
                               '(default: %(default)s)'))
+    parser.add_argument('--train_all', dest='train_all',
+                        type=bool, default=defaults.TRAIN_ALL,
+                        help="Use all possible actions or minimum set for training.")
 
     parameters = parser.parse_args(args)
     if parameters.experiment_prefix is None:
@@ -215,11 +218,19 @@ def launch(args, defaults, description):
 
     ale.loadROM(full_rom_path)
 
-    num_actions = len(ale.getMinimalActionSet())
+    avail_actions = ale.getMinimalActionSet()
+    if parameters.train_all:
+        num_actions = len(ale.getLegalActionSet())
+    else:
+        num_actions = len(avail_actions)
+
+    print "avail_actions: " + str(avail_actions)
+    print "num_actions: " + str(num_actions)
 
     if parameters.nn_file is None:
         network = q_network.DeepQLearner(defaults.RESIZED_WIDTH,
                                          defaults.RESIZED_HEIGHT,
+                                         avail_actions,
                                          num_actions,
                                          parameters.phi_length,
                                          parameters.discount,
@@ -233,7 +244,8 @@ def launch(args, defaults, description):
                                          parameters.network_type,
                                          parameters.update_rule,
                                          parameters.batch_accumulator,
-                                         rng)
+                                         rng,
+                                         parameters.train_all)
     else:
         handle = open(parameters.nn_file, 'r')
         network = cPickle.load(handle)
@@ -247,7 +259,8 @@ def launch(args, defaults, description):
                                   parameters.replay_start_size,
                                   parameters.update_frequency,
                                   rng,
-                                  exp_dir)
+                                  exp_dir,
+                                  parameters.train_all)
 
     experiment = ale_experiment.ALEExperiment(ale, agent,
                                               defaults.RESIZED_WIDTH,

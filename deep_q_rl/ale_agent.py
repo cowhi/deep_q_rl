@@ -22,7 +22,7 @@ class NeuralAgent(object):
 
     def __init__(self, q_network, epsilon_start, epsilon_min,
                  epsilon_decay, replay_memory_size, exp_pref,
-                 replay_start_size, update_frequency, rng, exp_dir):
+                 replay_start_size, update_frequency, rng, exp_dir, train_all):
 
         self.network = q_network
         self.epsilon_start = epsilon_start
@@ -52,6 +52,9 @@ class NeuralAgent(object):
 
         self.num_actions = self.network.num_actions
 
+        # TODO: add suport for legal action set
+        self.avail_actions = self.network.avail_actions
+        self.train_all = train_all
 
         self.data_set = ale_data_set.DataSet(width=self.image_width,
                                              height=self.image_height,
@@ -134,7 +137,9 @@ class NeuralAgent(object):
         self.loss_averages = []
 
         self.start_time = time.time()
-        return_action = self.rng.randint(0, self.num_actions)
+        #return_action = self.rng.randint(0, self.num_actions)
+        return_action_index = self.rng.randint(0, len(self.avail_actions))
+        return_action = self.avail_actions[return_action_index]
 
         self.last_action = return_action
 
@@ -197,7 +202,6 @@ class NeuralAgent(object):
                                              observation,
                                              np.clip(reward, -1, 1))
 
-
         self.last_action = action
         self.last_img = observation
 
@@ -208,13 +212,15 @@ class NeuralAgent(object):
         Add the most recent data to the data set and choose
         an action based on the current policy.
         """
-
+        # TODO: add selection for all legal actions
         data_set.add_sample(self.last_img, self.last_action, reward, False)
         if self.step_counter >= self.phi_length:
             phi = data_set.phi(cur_img)
             action = self.network.choose_action(phi, epsilon)
         else:
-            action = self.rng.randint(0, self.num_actions)
+            #action = self.rng.randint(0, self.num_actions)
+            action_index = self.rng.randint(0, len(self.avail_actions))
+            action = self.avail_actions[action_index]
 
         return action
 
